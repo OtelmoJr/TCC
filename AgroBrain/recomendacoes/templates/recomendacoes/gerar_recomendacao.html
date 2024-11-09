@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerar Recomendações de Solo</title>
+</head>
+<body>
+    <h1>Gerar Recomendações de Solo</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Gerar Recomendações</button>
+    </form>
+    
+    <h2>Recomendações:</h2>
+    <ul>
+        {% for recomendacao in recomendacoes %}
+            <li>{{ recomendacao }}</li>
+        {% empty %}
+            <li>Preencha o formulário e envie para ver as recomendações.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+
