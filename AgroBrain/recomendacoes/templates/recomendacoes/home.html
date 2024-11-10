@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Bem-vindo ao AgroBrain</title>
+    <style>
+        /* Estilos para o cabeçalho */
+        .header {
+            background-color: #4CAF50; /* Cor verde */
+            padding: 15px;
+            text-align: center;
+        }
+        .header img {
+            height: 60px; /* Ajuste o tamanho conforme necessário */
+        }
+
+        /* Estilos para o conteúdo */
+        .container {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin-top: 50px;
+        }
+        .container h1 {
+            color: #4CAF50;
+            font-size: 28px;
+        }
+        .container p {
+            font-size: 18px;
+            color: #555;
+        }
+        .container .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .container .btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho com a imagem do logotipo -->
+    <header class="header">
+        <img src="{% static 'images/agrobrain_logo.png' %}" alt="AgroBrain Logo">
+    </header>
+
+    <!-- Conteúdo principal -->
+    <div class="container">
+        <h1>Bem-vindo ao AgroBrain</h1>
+        <p>Sua plataforma para recomendações agrícolas personalizadas</p>
+        <a href="{% url 'gerar_recomendacao' %}" class="btn">Ir para Recomendações</a>
+    </div>
+</body>
+</html>

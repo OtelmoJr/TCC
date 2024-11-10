@@ -52,4 +52,4 @@ def gerar_recomendacao_view(request):
 
 
 def home(request):
-    return HttpResponse("Bem-vindo à página inicial do AgroBrain!")
+    return render(request, 'recomendacoes/home.html')
