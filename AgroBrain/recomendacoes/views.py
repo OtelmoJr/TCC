@@ -19,53 +19,103 @@ def gerar_recomendacao_view(request):
             'Saturação por Bases': float(form.cleaned_data['saturacao_bases'])
         }
 
-        # Função genérica de recomendação com base nos limites do tipo de solo
-        def calcular_recomendacao(nutriente, valor_atual, min_ideal, max_ideal, recomendacao_base):
+        def calcular_recomendacao(nutriente, valor_atual, min_ideal, max_ideal, recomendacao_base, justificativa):
             valor_atual, min_ideal, max_ideal = map(float, (valor_atual, min_ideal, max_ideal))
-            deficit = max(min_ideal - valor_atual, 0)  # Apenas valores abaixo do ideal são considerados
+            deficit = max(min_ideal - valor_atual, 0)
             if deficit > 0:
-                return recomendacao_base(deficit)
-            return None
+                return {
+                    "texto": f"{recomendacao_base(deficit)} {justificativa}",
+                    "classe": "deficiencia"
+                }
+            return {
+                "texto": f"{nutriente} está dentro do nível ideal.",
+                "classe": "ideal"
+            }
 
-        # Definir cada recomendação com base nos níveis de nutrientes e limites do tipo de solo selecionado
         recomendacoes.append(
-            calcular_recomendacao('pH', niveis_nutrientes['pH'], tipo_solo.ph_min, tipo_solo.ph_max,
-                                  lambda deficit: f"Adicione aproximadamente {round(deficit * 2, 1)} toneladas de calcário por hectare para ajuste de pH.")
+            calcular_recomendacao(
+                'pH',
+                niveis_nutrientes['pH'],
+                tipo_solo.ph_min,
+                tipo_solo.ph_max,
+                lambda deficit: f"Adicione aproximadamente {round(deficit * 2, 1)} toneladas de calcário por hectare para ajuste de pH.",
+                "Ajustar o pH melhora a disponibilidade de nutrientes para as plantas e aumenta a eficiência da adubação."
+            )
         )
 
         recomendacoes.append(
-            calcular_recomendacao('Matéria Orgânica', niveis_nutrientes['Matéria Orgânica'], tipo_solo.mo_min, tipo_solo.mo_max,
-                                  lambda deficit: f"Adicionar {round(deficit * 10, 1)} toneladas de composto orgânico por hectare.")
+            calcular_recomendacao(
+                'Matéria Orgânica',
+                niveis_nutrientes['Matéria Orgânica'],
+                tipo_solo.mo_min,
+                tipo_solo.mo_max,
+                lambda deficit: f"Adicionar {round(deficit * 10, 1)} toneladas de composto orgânico por hectare.",
+                "A matéria orgânica melhora a retenção de água, estrutura do solo e fornece nutrientes gradualmente."
+            )
         )
 
         recomendacoes.append(
-            calcular_recomendacao('Fósforo', niveis_nutrientes['Fósforo'], tipo_solo.fosforo_min, tipo_solo.fosforo_max,
-                                  lambda deficit: f"Aplique aproximadamente {round(deficit * 50, 1)} kg de superfosfato por hectare.")
+            calcular_recomendacao(
+                'Fósforo',
+                niveis_nutrientes['Fósforo'],
+                tipo_solo.fosforo_min,
+                tipo_solo.fosforo_max,
+                lambda deficit: f"Aplique aproximadamente {round(deficit * 50, 1)} kg de superfosfato por hectare.",
+                "O fósforo é essencial para o crescimento das raízes e desenvolvimento inicial das plantas."
+            )
         )
 
         recomendacoes.append(
-            calcular_recomendacao('Cálcio', niveis_nutrientes['Cálcio'], tipo_solo.calcio_min, tipo_solo.calcio_max,
-                                  lambda deficit: f"Aplicação de {round(deficit * 1.5, 1)} toneladas de calcário dolomítico por hectare para aumentar o cálcio.")
+            calcular_recomendacao(
+                'Cálcio',
+                niveis_nutrientes['Cálcio'],
+                tipo_solo.calcio_min,
+                tipo_solo.calcio_max,
+                lambda deficit: f"Aplicação de {round(deficit * 1.5, 1)} toneladas de calcário dolomítico por hectare para aumentar o cálcio.",
+                "O cálcio melhora a estrutura do solo e fortalece a parede celular das plantas."
+            )
         )
 
         recomendacoes.append(
-            calcular_recomendacao('Magnésio', niveis_nutrientes['Magnésio'], tipo_solo.magnesio_min, tipo_solo.magnesio_max,
-                                  lambda deficit: f"Para correção de magnésio, adicionar {round(deficit * 100, 1)} kg de sulfato de magnésio por hectare.")
+            calcular_recomendacao(
+                'Magnésio',
+                niveis_nutrientes['Magnésio'],
+                tipo_solo.magnesio_min,
+                tipo_solo.magnesio_max,
+                lambda deficit: f"Para correção de magnésio, adicionar {round(deficit * 100, 1)} kg de sulfato de magnésio por hectare.",
+                "O magnésio é importante para a fotossíntese, pois faz parte da clorofila."
+            )
         )
 
         recomendacoes.append(
-            calcular_recomendacao('Potássio', niveis_nutrientes['Potássio'], tipo_solo.potassio_min, tipo_solo.potassio_max,
-                                  lambda deficit: f"Adicione aproximadamente {round(deficit * 400, 1)} kg de cloreto de potássio por hectare para ajuste de potássio.")
+            calcular_recomendacao(
+                'Potássio',
+                niveis_nutrientes['Potássio'],
+                tipo_solo.potassio_min,
+                tipo_solo.potassio_max,
+                lambda deficit: f"Adicione aproximadamente {round(deficit * 400, 1)} kg de cloreto de potássio por hectare para ajuste de potássio.",
+                "O potássio ajuda na resistência a doenças e regula o equilíbrio hídrico das plantas."
+            )
         )
 
-        # Após as correções acima, recomenda-se observar a saturação por bases
         if niveis_nutrientes['Saturação por Bases'] < tipo_solo.saturacao_bases:
-            recomendacoes.append(f"A saturação por bases deve atingir pelo menos {tipo_solo.saturacao_bases}%. Realize as correções para alcançar esse valor.")
-
-        # Remover None (sem recomendação) e exibir apenas recomendações relevantes
-        recomendacoes = [rec for rec in recomendacoes if rec]
+            recomendacoes.append(
+                {
+                    "texto": f"A saturação por bases deve atingir pelo menos {tipo_solo.saturacao_bases}%. A aplicação de calcário ajudará a alcançar esse valor. "
+                             "A saturação por bases alta indica maior fertilidade do solo, favorecendo o crescimento saudável das plantas.",
+                    "classe": "deficiencia"
+                }
+            )
+        else:
+            recomendacoes.append(
+                {
+                    "texto": "A saturação por bases está dentro do nível ideal.",
+                    "classe": "ideal"
+                }
+            )
 
     return render(request, 'recomendacoes/gerar_recomendacao.html', {'form': form, 'recomendacoes': recomendacoes})
+
 
 
 
